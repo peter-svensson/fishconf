@@ -48,7 +48,7 @@ if not test -s $__fish_cache_dir/brew_init.fish
 end
 
 # Fisher
-#init_fisher
+init_fisher
 
 # Add bin directories to path.
 set -g prepath (
