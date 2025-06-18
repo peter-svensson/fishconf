@@ -1,7 +1,6 @@
 function ip -d 'show external ip'
-  dig +short myip.opendns.com @resolver1.opendns.com
+  curl -s http://ipecho.net/plain; echo
 end
-
 
 function localip -d 'show local ip'
   ipconfig getifaddr en0

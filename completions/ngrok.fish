@@ -1,213 +1,44 @@
-#compdef ngrok
-compdef _ngrok ngrok
+# Commands
+complete -c ngrok -f -a authtoken -d "Save authtoken to configuration file"
+complete -c ngrok -f -a credits -d "Prints author and licensing information"
+complete -c ngrok -f -a http -d "Start an HTTP tunnel"
+complete -c ngrok -f -a start -d "Start tunnels by name from the configuration file"
+complete -c ngrok -f -a tcp -d "Start a TCP tunnel"
+complete -c ngrok -f -a tls -d "Start a TLS tunnel"
+complete -c ngrok -f -a update -d "Update ngrok to the latest version"
+complete -c ngrok -f -a version -d "Print the version string"
+complete -c ngrok -f -a help -d "Shows a list of commands or help for one command"
 
-# zsh completion for ngrok                                -*- shell-script -*-
+# General Options
+complete -c ngrok -l help -e -f
+complete -c ngrok -l authtoken -r -d "ngrok.com authtoken identifying a user"
+complete -c ngrok -l config -r -d "path to config files; they are merged if multiple"
+complete -c ngrok -l log -x -a "false stderr stdout" -d "path to log file, 'stdout', 'stderr' or 'false'"
+complete -c ngrok -l log-format -x -a "term logfmt json" -d "log record format: 'term', 'logfmt', 'json'"
+complete -c ngrok -l log-level -r -a info -d "logging level"
+complete -c ngrok -l region -x -a "us eu au ap" -d "ngrok server region [us , eu, au, ap] (default: us)"
 
-__ngrok_debug()
-{
-    local file="$BASH_COMP_DEBUG_FILE"
-    if [[ -n ${file} ]]; then
-        echo "$*" >> "${file}"
-    fi
-}
+# http & tls's options
+complete -c ngrok -l hostname -r -d "host tunnel on custom hostname (requires DNS CNAME)"
+complete -c ngrok -l subdomain -r -d "host tunnel on a custom subdomain"
 
-_ngrok()
-{
-    local shellCompDirectiveError=1
-    local shellCompDirectiveNoSpace=2
-    local shellCompDirectiveNoFileComp=4
-    local shellCompDirectiveFilterFileExt=8
-    local shellCompDirectiveFilterDirs=16
-    local shellCompDirectiveKeepOrder=32
+# http's options
+complete -c ngrok -l auth -r -d "enforce basic auth on tunnel endpoint, 'user:password'"
+complete -c ngrok -l bind-tls -x -a "both https http" -d "listen for http, https or both: true/false/both"
+complete -c ngrok -l host-header -r -d "set Host header; if 'rewrite' use local address hostname"
+complete -c ngrok -l inspect -d "enable/disable http introspection"
 
-    local lastParam lastChar flagPrefix requestComp out directive comp lastComp noSpace keepOrder
-    local -a completions
+# tls's options
+complete -c ngrok -l client-cas -r -d "path to TLS certificate authority to verify client certs"
+complete -c ngrok -l crt -r -d "path to a TLS certificate for TLS termination"
+complete -c ngrok -l key -r -d "path to a TLS key for TLS termination"
 
-    __ngrok_debug "\n========= starting completion logic =========="
-    __ngrok_debug "CURRENT: ${CURRENT}, words[*]: ${words[*]}"
+# start's options
+complete -c ngrok -l all -d "start all tunnels in the configuration file"
+complete -c ngrok -l none -d "start running no tunnels"
 
-    # The user could have moved the cursor backwards on the command-line.
-    # We need to trigger completion from the $CURRENT location, so we need
-    # to truncate the command-line ($words) up to the $CURRENT location.
-    # (We cannot use $CURSOR as its value does not work when a command is an alias.)
-    words=("${=words[1,CURRENT]}")
-    __ngrok_debug "Truncated words[*]: ${words[*]},"
+# tcp's options
+complete -c ngrok -l remote-addr -r -d "bind remote address (requires you reserve an address)"
 
-    lastParam=${words[-1]}
-    lastChar=${lastParam[-1]}
-    __ngrok_debug "lastParam: ${lastParam}, lastChar: ${lastChar}"
-
-    # For zsh, when completing a flag with an = (e.g., ngrok -n=<TAB>)
-    # completions must be prefixed with the flag
-    setopt local_options BASH_REMATCH
-    if [[ "${lastParam}" =~ '-.*=' ]]; then
-        # We are dealing with a flag with an =
-        flagPrefix="-P ${BASH_REMATCH}"
-    fi
-
-    # Prepare the command to obtain completions
-    requestComp="${words[1]} __complete ${words[2,-1]}"
-    if [ "${lastChar}" = "" ]; then
-        # If the last parameter is complete (there is a space following it)
-        # We add an extra empty parameter so we can indicate this to the go completion code.
-        __ngrok_debug "Adding extra empty parameter"
-        requestComp="${requestComp} \"\""
-    fi
-
-    __ngrok_debug "About to call: eval ${requestComp}"
-
-    # Use eval to handle any environment variables and such
-    out=$(eval ${requestComp} 2>/dev/null)
-    __ngrok_debug "completion output: ${out}"
-
-    # Extract the directive integer following a : from the last line
-    local lastLine
-    while IFS='\n' read -r line; do
-        lastLine=${line}
-    done < <(printf "%s\n" "${out[@]}")
-    __ngrok_debug "last line: ${lastLine}"
-
-    if [ "${lastLine[1]}" = : ]; then
-        directive=${lastLine[2,-1]}
-        # Remove the directive including the : and the newline
-        local suffix
-        (( suffix=${#lastLine}+2))
-        out=${out[1,-$suffix]}
-    else
-        # There is no directive specified.  Leave $out as is.
-        __ngrok_debug "No directive found.  Setting do default"
-        directive=0
-    fi
-
-    __ngrok_debug "directive: ${directive}"
-    __ngrok_debug "completions: ${out}"
-    __ngrok_debug "flagPrefix: ${flagPrefix}"
-
-    if [ $((directive & shellCompDirectiveError)) -ne 0 ]; then
-        __ngrok_debug "Completion received error. Ignoring completions."
-        return
-    fi
-
-    local activeHelpMarker="_activeHelp_ "
-    local endIndex=${#activeHelpMarker}
-    local startIndex=$((${#activeHelpMarker}+1))
-    local hasActiveHelp=0
-    while IFS='\n' read -r comp; do
-        # Check if this is an activeHelp statement (i.e., prefixed with $activeHelpMarker)
-        if [ "${comp[1,$endIndex]}" = "$activeHelpMarker" ];then
-            __ngrok_debug "ActiveHelp found: $comp"
-            comp="${comp[$startIndex,-1]}"
-            if [ -n "$comp" ]; then
-                compadd -x "${comp}"
-                __ngrok_debug "ActiveHelp will need delimiter"
-                hasActiveHelp=1
-            fi
-
-            continue
-        fi
-
-        if [ -n "$comp" ]; then
-            # If requested, completions are returned with a description.
-            # The description is preceded by a TAB character.
-            # For zsh's _describe, we need to use a : instead of a TAB.
-            # We first need to escape any : as part of the completion itself.
-            comp=${comp//:/\\:}
-
-            local tab="$(printf '\t')"
-            comp=${comp//$tab/:}
-
-            __ngrok_debug "Adding completion: ${comp}"
-            completions+=${comp}
-            lastComp=$comp
-        fi
-    done < <(printf "%s\n" "${out[@]}")
-
-    # Add a delimiter after the activeHelp statements, but only if:
-    # - there are completions following the activeHelp statements, or
-    # - file completion will be performed (so there will be choices after the activeHelp)
-    if [ $hasActiveHelp -eq 1 ]; then
-        if [ ${#completions} -ne 0 ] || [ $((directive & shellCompDirectiveNoFileComp)) -eq 0 ]; then
-            __ngrok_debug "Adding activeHelp delimiter"
-            compadd -x "--"
-            hasActiveHelp=0
-        fi
-    fi
-
-    if [ $((directive & shellCompDirectiveNoSpace)) -ne 0 ]; then
-        __ngrok_debug "Activating nospace."
-        noSpace="-S ''"
-    fi
-
-    if [ $((directive & shellCompDirectiveKeepOrder)) -ne 0 ]; then
-        __ngrok_debug "Activating keep order."
-        keepOrder="-V"
-    fi
-
-    if [ $((directive & shellCompDirectiveFilterFileExt)) -ne 0 ]; then
-        # File extension filtering
-        local filteringCmd
-        filteringCmd='_files'
-        for filter in ${completions[@]}; do
-            if [ ${filter[1]} != '*' ]; then
-                # zsh requires a glob pattern to do file filtering
-                filter="\*.$filter"
-            fi
-            filteringCmd+=" -g $filter"
-        done
-        filteringCmd+=" ${flagPrefix}"
-
-        __ngrok_debug "File filtering command: $filteringCmd"
-        _arguments '*:filename:'"$filteringCmd"
-    elif [ $((directive & shellCompDirectiveFilterDirs)) -ne 0 ]; then
-        # File completion for directories only
-        local subdir
-        subdir="${completions[1]}"
-        if [ -n "$subdir" ]; then
-            __ngrok_debug "Listing directories in $subdir"
-            pushd "${subdir}" >/dev/null 2>&1
-        else
-            __ngrok_debug "Listing directories in ."
-        fi
-
-        local result
-        _arguments '*:dirname:_files -/'" ${flagPrefix}"
-        result=$?
-        if [ -n "$subdir" ]; then
-            popd >/dev/null 2>&1
-        fi
-        return $result
-    else
-        __ngrok_debug "Calling _describe"
-        if eval _describe $keepOrder "completions" completions $flagPrefix $noSpace; then
-            __ngrok_debug "_describe found some completions"
-
-            # Return the success of having called _describe
-            return 0
-        else
-            __ngrok_debug "_describe did not find completions."
-            __ngrok_debug "Checking if we should do file completion."
-            if [ $((directive & shellCompDirectiveNoFileComp)) -ne 0 ]; then
-                __ngrok_debug "deactivating file completion"
-
-                # We must return an error code here to let zsh know that there were no
-                # completions found by _describe; this is what will trigger other
-                # matching algorithms to attempt to find completions.
-                # For example zsh can match letters in the middle of words.
-                return 1
-            else
-                # Perform file completion
-                __ngrok_debug "Activating file completion"
-
-                # We must return the result of this command, so it must be the
-                # last command, or else we must store its result to return it.
-                _arguments '*:filename:_files'" ${flagPrefix}"
-            fi
-        fi
-    fi
-}
-
-# don't run the completion function when being source-ed or eval-ed
-if [ "$funcstack[1]" = "_ngrok" ]; then
-    _ngrok
-fi
-compdef _ngrok ngrok
+# update's options
+complete -c ngrok -l channel -x -a "stable beta" -d "update channel (stable, beta)"

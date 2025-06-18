@@ -5,8 +5,9 @@
 # https://github.com/fish-shell/fish-shell/blob/master/share/config.fish
 # https://github.com/fish-shell/fish-shell/blob/da32b6c172dcfe54c9dc4f19e46f35680fc8a91a/share/config.fish#L257-L269
 
-# Set initial working directory.
-set -g IWD $PWD
+if status is-interactive
+  cd $HOME
+end
 
 #
 # Utils
@@ -55,3 +56,7 @@ status is-interactive; and begin
   set fish_tmux_autostart true
   set fish_tmux_autoconnect true
 end
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
