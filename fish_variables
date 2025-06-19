@@ -68,4 +68,4 @@ SETUVAR fish_pager_color_selected_background:\x1d
 SETUVAR fish_pager_color_selected_completion:\x1d
 SETUVAR fish_pager_color_selected_description:\x1d
 SETUVAR fish_pager_color_selected_prefix:\x1d
-SETUVAR fish_user_paths:/Users/peter/\x2elocal/bin\x1e/Users/peter/bin\x1e/opt/homebrew/opt/sqlite/bin\x1e/opt/homebrew/opt/curl/bin\x1e/opt/homebrew/opt/ruby/bin
+SETUVAR fish_user_paths:/Users/peter/\x2elocal/bin\x1e/Users/peter/\x2egobrew/current/bin\x1e/Users/peter/\x2egobrew/bin\x1e/Users/peter/go/bin\x1e/Users/peter/bin\x1e/opt/homebrew/opt/sqlite/bin\x1e/opt/homebrew/opt/curl/bin\x1e/opt/homebrew/opt/ruby/bin

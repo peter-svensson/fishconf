@@ -53,14 +53,13 @@ init_fisher
 # Add bin directories to path.
 set -g prepath (
     path filter \
-        $HOME/.local/bin
-        $HOME/bin
+        $HOME/.local/bin \
+        $HOME/.gobrew/current/bin \
+        $HOME/.gobrew/bin \
+        $HOME/go/bin \
+        $HOME/bin \
 )
 
 fish_add_path --prepend --move $prepath
 
-#  TODO
-# export PATH="$HOME/.gobrew/bin:$PATH"
-# export PATH="$HOME/.gobrew/current/bin:$PATH"
-# export PATH="$HOME/go/bin:$PATH"
 
