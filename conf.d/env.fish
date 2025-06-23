@@ -11,8 +11,8 @@ set -q LESS_TERMCAP_ue; or set -Ux LESS_TERMCAP_ue (set_color normal)
 
 # Set editor variables.
 set -q PAGER; or set -Ux PAGER less
-set -q VISUAL; or set -Ux VISUAL vim
-set -q EDITOR; or set -Ux EDITOR vim
+set -q VISUAL; or set -Ux VISUAL nvim
+set -q EDITOR; or set -Ux EDITOR nvim
 
 # Set browser on macOS.
 switch (uname -s)
