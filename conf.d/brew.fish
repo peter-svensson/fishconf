@@ -29,3 +29,6 @@ set -q HOMEBREW_NO_ANALYTICS || set -gx HOMEBREW_NO_ANALYTICS 1
 
 # Reset pre-path
 set -q prepath && fish_add_path --prepend --move $prepath
+
+fish_add_path -gP "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin/";
+
